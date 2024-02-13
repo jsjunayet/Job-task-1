@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 function Home({ onLogout, token }) {
     const [user, setUser] = useState(null);
     const [Products, setProducts] = useState([]);
+    const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
         if (token) {
@@ -25,16 +26,20 @@ function Home({ onLogout, token }) {
             .catch(error => console.error('Error fetching products:', error));
     }, []);
 
+    const toggleDarkMode = () => {
+        setDarkMode(prevMode => !prevMode);
+    }
+
     return (
-        <div className="">
-            <nav className="bg-gray-600 fixed w-full top-0 ">
+        <div className={darkMode ? "bg-gray-800 text-white" : ""}>
+            <nav className={`bg-gray-600 fixed w-full top-0 ${darkMode ? "bg-white text-black border-b-2 border-black" : ""}`}>
                 <div className=" max-w-7xl mx-auto flex justify-between items-center py-1">
                     <div className="flex gap-1  items-center">
                         <img src="../../../src/assets/Logo (1).png" className=" w-16 h-14 object-contain" alt="logo" />
-                        <p className="font-bold text-xl text-white">Ecommerce</p>
+                        <p className={`font-bold text-xl ${darkMode ? "text-black" : "text-white"}`}>Ecommerce</p>
                     </div>
                     <div className="flex justify-center items-center gap-2">
-                        <input type="checkbox" className="toggle toggle-success" checked />
+                        <input type="checkbox" className="toggle toggle-success" checked={darkMode} onChange={toggleDarkMode} />
                         <div className="flex gap-2 justify-center items-center">
                             <div className="dropdown dropdown-end">
                                 <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
@@ -43,9 +48,9 @@ function Home({ onLogout, token }) {
                                     </div>
                                 </label>
                                 <ul tabIndex={0} className="mt-3 ml-20 z-[1] p-2 text-black text-center shadow menu dropdown-content bg-base-100 rounded-box w-40">
-                                    {user && <p className='ml-2 mt-1 text-gray-800 text-sm'>{user?.username}</p>}
-                                    {user && <p className='ml-2 mt-1 text-gray-500 text-sm'>{user?.email}</p>}
-                                    {user && <button className='ml-2 mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600 transition duration-300' onClick={onLogout}>Log Out</button>}
+                                    {user && <p className="ml-2 mt-1 text-sm">{user?.username}</p>}
+                                    {user && <p className="ml-2 mt-1 text-gray-500 text-sm">{user?.email}</p>}
+                                    {user && <button className="ml-2 mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600 transition duration-300" onClick={onLogout}>Log Out</button>}
                                 </ul>
                             </div>
                         </div>
@@ -53,10 +58,10 @@ function Home({ onLogout, token }) {
                 </div>
             </nav>
             <main>
-                <div className="max-w-7xl mx-auto mt-24">
+                <div className="max-w-7xl mx-auto mt-16 pt-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
                         {Products?.map(product => (
-                            <div key={product.id} className=" mx-auto overflow-hidden rounded-lg shadow-lg">
+                            <div key={product.id} className={`mx-auto overflow-hidden rounded-lg shadow-lg ${darkMode ? "bg-gray-800 text-white border-black border-2" : ""}`}>
                                 <div className="h-64">
                                     <img
                                         className="object-contain w-full h-full"
@@ -65,16 +70,14 @@ function Home({ onLogout, token }) {
                                     />
                                 </div>
                                 <div className="py-4 px-6">
-                                    <h1 className="text-lg font-semibold text-gray-800 truncate">
+                                    <h1 className="text-lg font-semibold truncate">
                                         {product.title}
                                     </h1>
-                                    <p className="text-sm text-gray-600 mt-1">{product.description}</p>
+                                    <p className="text-sm">{product.description}</p>
                                     <div className="flex items-center justify-between mt-4">
-                                        <p className="text-gray-800 font-bold">
-                                            ${product.price.toFixed(2)}
-                                        </p>
+                                        <p className="font-bold">${product.price.toFixed(2)}</p>
                                         <div className="flex items-center">
-                                            <p className="text-gray-600">Rating: {product.rating}</p>
+                                            <p>Rating: {product.rating}</p>
                                             <div className="ml-2">
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +95,7 @@ function Home({ onLogout, token }) {
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between mt-4">
-                                        <p className="text-gray-600">In Stock: {product.stock}</p>
+                                        <p>In Stock: {product.stock}</p>
                                         <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600 transition duration-300">
                                             Add to Cart
                                         </button>
