@@ -55,7 +55,7 @@ function Login({ onLogin }) {
                             className="w-full py-1 px-2 rounded bg-gray-300 border-none focus:bg-gray-600 text-black  pl-10"
                         />
                     </div>
-                    <button disabled={loading} className="mx-auto bg-gray-300 text-xl font-semibold text-black py-1 px-3 rounded-sm hover:bg-gray-500">{loading ? "Logging in..." : "Login"}</button>
+                    <button disabled={loading} className="mx-auto bg-gray-300 text-xl font-semibold text-black py-1 px-3 rounded-sm hover:bg-gray-500">{loading ? <p className='flex gap-1 justify-start items-center'>Login <span className="loading loading-dots loading-sm"></span> </p> : "Login"}</button>
                 </form>
             </div>
         </div>
