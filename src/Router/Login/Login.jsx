@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RiLockPasswordLine, RiUserLine } from 'react-icons/ri';
+import { toast } from 'react-toastify';
 
 function Login({ onLogin }) {
     const [loading, setLoading] = useState(false);
@@ -21,13 +22,17 @@ function Login({ onLogin }) {
             if (data && data.token) {
                 localStorage.setItem('token', data.token);
                 setLoading(false);
-                onLogin(data.token); // Pass the token to the onLogin function
+                toast.success("successful add ")
+                onLogin(data.token);
+
             } else {
                 setLoading(false);
+                toast.error("Wrong email & password")
                 console.error("Invalid response from server");
             }
         } catch (error) {
             setLoading(false);
+            toast.error("Wrong email & password")
             console.error(error);
         }
     };
@@ -35,7 +40,7 @@ function Login({ onLogin }) {
     return (
         <div className='min-h-screen flex justify-center items-center'>
             <div className="w-96 shadow-xl bg-base-300 rounded-xl py-16 px-8">
-                <img src="/src/assets/login (1).png" alt="login" className="w-24 h-20 object-cover mx-auto mb-5" />
+                <img src="/src/assets/login.png" alt="login" className="w-24 h-20 object-cover mx-auto mb-5" />
                 <form onSubmit={handleLogin} className="space-y-3">
                     <div className="relative">
                         <RiUserLine className="absolute top-2 left-3 text-gray-400" />
