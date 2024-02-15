@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { RiLockPasswordLine, RiUserLine } from 'react-icons/ri';
 import { toast } from 'react-toastify';
+import logo from '../../assets/login.png';
 
 function Login({ onLogin }) {
     const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ function Login({ onLogin }) {
             if (data && data.token) {
                 localStorage.setItem('token', data.token);
                 setLoading(false);
-                toast.success("successful add ")
+                toast.success("successful Login ")
                 onLogin(data.token);
 
             } else {
@@ -40,7 +41,7 @@ function Login({ onLogin }) {
     return (
         <div className='min-h-screen flex justify-center items-center'>
             <div className="w-96 shadow-xl bg-base-300 rounded-xl py-16 px-8">
-                <img src="/src/assets/login.png" alt="login" className="w-24 h-20 object-cover mx-auto mb-5" />
+                <img src={logo} alt="login" className="w-24 h-20 object-cover mx-auto mb-5" />
                 <form onSubmit={handleLogin} className="space-y-3">
                     <div className="relative">
                         <RiUserLine className="absolute top-2 left-3 text-gray-400" />

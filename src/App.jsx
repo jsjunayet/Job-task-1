@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Home from "./Router/Home/Home";
 import Login from "./Router/Login/Login";
+import { toast } from "react-toastify";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -12,6 +13,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken(null);
+    toast.error("LogOut")
   };
 
   return (

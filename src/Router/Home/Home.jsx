@@ -3,7 +3,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { IoSearch, IoArrowForward } from 'react-icons/io5';
 import { ToastContainer, toast } from 'react-toastify';
-
+import logo from '../../assets/Logo.png';
 
 function Home({ onLogout, token }) {
     const [user, setUser] = useState(null);
@@ -14,11 +14,25 @@ function Home({ onLogout, token }) {
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
     const [cart, setCart] = useState([]);
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const handleOpenModal = () => {
+        setModalOpen(true)
+    };
+    const handleModalClose = () => {
+        setModalOpen(false);
+    };
+    useEffect(() => {
+        const storedCart = JSON.parse(localStorage.getItem("cart"));
+        setCart(storedCart || []);
+    }, []);
 
     useEffect(() => {
-        const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-        setCart(storedCart);
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }, [cart]);
 
+
+    useEffect(() => {
         if (token) {
             fetch('https://dummyjson.com/auth/me', {
                 method: 'GET',
@@ -31,10 +45,6 @@ function Home({ onLogout, token }) {
                 .catch(error => console.error('Error fetching user:', error));
         }
     }, [token]);
-    // Save cart data to localStorage whenever it changes
-    useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cart));
-    }, [cart]);
 
     useEffect(() => {
         fetch('https://dummyjson.com/products')
@@ -48,15 +58,7 @@ function Home({ onLogout, token }) {
 
     const toggleDarkMode = () => {
         setDarkMode(prevMode => !prevMode);
-        AOS.refresh();
     };
-
-    useEffect(() => {
-        AOS.init({
-            anchorPlacement: 'top-bottom',
-            offset: 200,
-        });
-    }, []);
 
     const handleSearch = async () => {
         const localFiltered = products.filter(product =>
@@ -101,20 +103,55 @@ function Home({ onLogout, token }) {
     };
 
     const calculateTotalPrice = () => {
-        return cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
+        return cart.reduce((total, item) => total + item.price, 0).toFixed(2);
     };
+
+    useEffect(() => {
+        AOS.init({
+            duration: 1000 // Adjust the animation duration as per your preference
+        });
+    }, []);
 
     return (
         <div className={darkMode ? "bg-gray-800 text-white" : ""}>
             <nav className={`bg-gray-600 fixed w-full top-0 z-50 ${darkMode ? "bg-white text-black border-b-2 border-black" : ""}`}>
                 <div className=" max-w-7xl mx-auto flex justify-between items-center py-1">
-                    <div className="flex gap-1  items-center">
-                        <img src="../../../src/assets/Logo.png" className=" w-16 h-14 object-contain" alt="logo" />
-                        <p className={`font-bold text-xl ${darkMode ? "text-black" : "text-white"}`}>Ecommerce</p>
+                    <div className="flex md:gap-1 gap-[1px]  items-center">
+                        <img src={logo} className="w-14 md:w-16 h-14 object-contain" alt="logo" />
+                        <p className={`md:font-bold text-xl font-medium ${darkMode ? "text-black" : "text-white"}`}>Ecommerce</p>
                     </div>
                     <div className="flex justify-center items-center gap-2">
-                        <input type="checkbox" className="toggle toggle-success" checked={darkMode} onChange={toggleDarkMode} />
                         <div className="flex gap-2 justify-center items-center">
+                            <button className="bg-base-300 py-1 px-2 rounded-xl" onClick={handleOpenModal}>
+                                Cart
+                                <div className="badge badge-secondary"> {cart.length}</div>
+                            </button>
+                            {modalOpen && <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                                <div className=" relative mt-10 p-8 rounded bg-gray-900 text-white shadow-lg w-full sm:max-w-md">
+                                    <button className="absolute top-0 right-0 p-2 text-red-400" onClick={handleModalClose}>X</button>
+                                    <h2 className="text-2xl font-bold mb-4">Shopping</h2>
+                                    <div>
+                                        {cart.map((item, index) => (
+                                            <div key={item.id} className="flex justify-between items-center py-2">
+                                                <div className="flex-1">
+                                                    <p className="text-lg font-semibold">{index + 1}. {item.title}</p>
+                                                    <p className="text-sm text-gray-500">Price: ${item.price.toFixed(2)}</p>
+                                                </div>
+                                                <div>
+                                                    <button className="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600 transition duration-300" onClick={() => removeFromCart(item.id)}>
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <hr className="border-2 border-black my-4" />
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-lg font-semibold">Total:</p>
+                                            <p className="text-lg font-semibold">${calculateTotalPrice()}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>}
                             <div className="dropdown dropdown-end">
                                 <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                                     <div className="w-10 rounded-full">
@@ -127,13 +164,14 @@ function Home({ onLogout, token }) {
                                     {user && <button className="ml-2 mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600 transition duration-300" onClick={onLogout}>Log Out</button>}
                                 </ul>
                             </div>
+                            <input type="checkbox" className="toggle toggle-success" checked={darkMode} onChange={toggleDarkMode} />
                         </div>
                     </div>
                 </div>
             </nav>
             <main>
                 <div className="max-w-7xl mx-auto mt-16 pt-5">
-                    <div className="lg:flex gap-10  items-center">
+                    <div className="md:flex   gap-10 justify-center items-center">
                         <div className="mb-4 md:ml-0 ml-4">
                             <input
                                 type="text"
@@ -172,16 +210,15 @@ function Home({ onLogout, token }) {
                             </button>
                         </div>
                     </div>
-                    <div className=" grid grid-cols-12">
-                        <div className=" col-span-10">
+                    <div className=" ">
+                        <div className="">
                             <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {filteredProducts?.map((product, index) => (
                                     <div
                                         key={product.id}
-                                        data-aos="fade-up"
                                         className={`mx-auto overflow-hidden rounded-lg shadow-lg ${darkMode ? 'bg-gray-800 text-white border-black border-2' : ''
                                             }`}
-                                        style={{ transition: "transform 0.5s" }}
+                                        data-aos="fade-up" // Add AOS data attribute for fade-up animation
                                     >
                                         <div className="h-64">
                                             <img
@@ -222,29 +259,6 @@ function Home({ onLogout, token }) {
                                         </div>
                                     </div>
                                 ))}
-                            </div>
-                        </div>
-                        <div className=" col-span-2 bg-base-300">
-                            <div className="p-4">
-                                <h2 className="text-xl font-semibold mb-4">Shopping Cart</h2>
-                                {cart.map((item, index) => (
-                                    <div key={item.id} className="flex justify-between items-center  py-2">
-                                        <div className="flex-1">
-                                            <p className="text-lg font-semibold">{index + 1}. {item.title}</p>
-                                            <p className="text-sm text-gray-500">Price: ${item.price.toFixed(2)}</p>
-                                        </div>
-                                        <div>
-                                            <button className="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600 transition duration-300" onClick={() => removeFromCart(item.id)}>
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                                <hr className="border-2 border-black my-4" />
-                                <div className="flex justify-between items-center">
-                                    <p className="text-lg font-semibold">Total:</p>
-                                    <p className="text-lg font-semibold">${calculateTotalPrice()}</p>
-                                </div>
                             </div>
                         </div>
                     </div>
