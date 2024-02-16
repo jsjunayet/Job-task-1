@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { IoSearch, IoArrowForward } from 'react-icons/io5';
-import { ToastContainer, toast } from 'react-toastify';
-import logo from '../../assets/Logo.png';
+import { toast } from 'react-toastify';
+import Navbar from "./Navbar/Navbar";
+import Product from "./Product/Product";
+import Modal from "./Modal/Modal";
+
 
 function Home({ onLogout, token }) {
     const [user, setUser] = useState(null);
@@ -19,42 +21,10 @@ function Home({ onLogout, token }) {
     const handleOpenModal = () => {
         setModalOpen(true)
     };
+
     const handleModalClose = () => {
         setModalOpen(false);
     };
-    useEffect(() => {
-        const storedCart = JSON.parse(localStorage.getItem("cart"));
-        setCart(storedCart || []);
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cart));
-    }, [cart]);
-
-
-    useEffect(() => {
-        if (token) {
-            fetch('https://dummyjson.com/auth/me', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            })
-                .then(res => res.json())
-                .then(data => setUser(data))
-                .catch(error => console.error('Error fetching user:', error));
-        }
-    }, [token]);
-
-    useEffect(() => {
-        fetch('https://dummyjson.com/products')
-            .then(res => res.json())
-            .then(data => {
-                setProducts(data?.products);
-                setFilteredProducts(data?.products);
-            })
-            .catch(error => console.error('Error fetching products:', error));
-    }, []);
 
     const toggleDarkMode = () => {
         setDarkMode(prevMode => !prevMode);
@@ -93,7 +63,6 @@ function Home({ onLogout, token }) {
         const updatedCart = [...cart, { ...product }];
         setCart(updatedCart);
         toast.success("successful add !")
-
     };
 
     const removeFromCart = (productId) => {
@@ -107,68 +76,54 @@ function Home({ onLogout, token }) {
     };
 
     useEffect(() => {
+        const storedCart = JSON.parse(localStorage.getItem("cart"));
+        setCart(storedCart || []);
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }, [cart]);
+
+    useEffect(() => {
+        if (token) {
+            fetch('https://dummyjson.com/auth/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+                .then(res => res.json())
+                .then(data => setUser(data))
+                .catch(error => console.error('Error fetching user:', error));
+        }
+    }, [token]);
+
+    useEffect(() => {
+        fetch('https://dummyjson.com/products')
+            .then(res => res.json())
+            .then(data => {
+                setProducts(data?.products);
+                setFilteredProducts(data?.products);
+            })
+            .catch(error => console.error('Error fetching products:', error));
+    }, []);
+
+    useEffect(() => {
         AOS.init({
-            duration: 1000 // Adjust the animation duration as per your preference
+            duration: 1000
         });
     }, []);
 
     return (
         <div className={darkMode ? "bg-gray-800 text-white" : ""}>
-            <nav className={`bg-gray-600 fixed w-full top-0 z-50 ${darkMode ? "bg-white text-black border-b-2 border-black" : ""}`}>
-                <div className=" max-w-7xl mx-auto flex justify-between items-center py-1">
-                    <div className="flex md:gap-1 gap-[1px]  items-center">
-                        <img src={logo} className="w-14 md:w-16 h-14 object-contain" alt="logo" />
-                        <p className={`md:font-bold text-xl font-medium ${darkMode ? "text-black" : "text-white"}`}>Ecommerce</p>
-                    </div>
-                    <div className="flex justify-center items-center gap-2">
-                        <div className="flex gap-2 justify-center items-center">
-                            <button className="bg-base-300 py-1 px-2 rounded-xl" onClick={handleOpenModal}>
-                                Cart
-                                <div className="badge badge-secondary"> {cart.length}</div>
-                            </button>
-                            {modalOpen && <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                                <div className=" relative mt-10 p-8 rounded bg-gray-900 text-white shadow-lg w-full sm:max-w-md">
-                                    <button className="absolute top-0 right-0 p-2 text-red-400" onClick={handleModalClose}>X</button>
-                                    <h2 className="text-2xl font-bold mb-4">Shopping</h2>
-                                    <div>
-                                        {cart.map((item, index) => (
-                                            <div key={item.id} className="flex justify-between items-center py-2">
-                                                <div className="flex-1">
-                                                    <p className="text-lg font-semibold">{index + 1}. {item.title}</p>
-                                                    <p className="text-sm text-gray-500">Price: ${item.price.toFixed(2)}</p>
-                                                </div>
-                                                <div>
-                                                    <button className="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600 transition duration-300" onClick={() => removeFromCart(item.id)}>
-                                                        Remove
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        <hr className="border-2 border-black my-4" />
-                                        <div className="flex justify-between items-center">
-                                            <p className="text-lg font-semibold">Total:</p>
-                                            <p className="text-lg font-semibold">${calculateTotalPrice()}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>}
-                            <div className="dropdown dropdown-end">
-                                <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-                                    <div className="w-10 rounded-full">
-                                        {user && <img alt="User" src={user?.image} />}
-                                    </div>
-                                </label>
-                                <ul tabIndex={0} className="mt-3 ml-20 z-[1] p-2 text-black text-center shadow menu dropdown-content bg-base-100 rounded-box w-40">
-                                    {user && <p className="ml-2 mt-1 text-sm">{user?.username}</p>}
-                                    {user && <p className="ml-2 mt-1 text-gray-500 text-sm">{user?.email}</p>}
-                                    {user && <button className="ml-2 mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600 transition duration-300" onClick={onLogout}>Log Out</button>}
-                                </ul>
-                            </div>
-                            <input type="checkbox" className="toggle toggle-success" checked={darkMode} onChange={toggleDarkMode} />
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Navbar
+                darkMode={darkMode}
+                toggleDarkMode={toggleDarkMode}
+                user={user}
+                onLogout={onLogout}
+                cart={cart}
+                handleOpenModal={handleOpenModal}
+            />
             <main>
                 <div className="max-w-7xl mx-auto mt-16 pt-5">
                     <div className="md:flex   gap-10 justify-center items-center">
@@ -214,56 +169,19 @@ function Home({ onLogout, token }) {
                         <div className="">
                             <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {filteredProducts?.map((product, index) => (
-                                    <div
+                                    <Product
                                         key={product.id}
-                                        className={`mx-auto overflow-hidden rounded-lg shadow-lg ${darkMode ? 'bg-gray-800 text-white border-black border-2' : ''
-                                            }`}
-                                        data-aos="fade-up" // Add AOS data attribute for fade-up animation
-                                    >
-                                        <div className="h-64">
-                                            <img
-                                                className="object-contain w-full h-full hover:scale-105"
-                                                src={product.images[0]}
-                                                alt={product.title}
-                                            />
-                                        </div>
-                                        <div className="py-4 px-6">
-                                            <h1 className="text-lg font-semibold truncate">{product.title}</h1>
-                                            <p className="text-sm">{product.description}</p>
-                                            <div className="flex items-center justify-between mt-4">
-                                                <p className="font-bold">${product.price.toFixed(2)}</p>
-                                                <div className="flex items-center">
-                                                    <p>Rating: {product.rating}</p>
-                                                    <div className="ml-2">
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-5 w-5 text-yellow-500"
-                                                            viewBox="0 0 20 20"
-                                                            fill="currentColor"
-                                                        >
-                                                            <path
-                                                                fillRule="evenodd"
-                                                                d="M10 0l2.597 6.354H18.5l-5.268 4.736L15.36 20 10 15.609 4.641 19.999l2.768-4.91L1.5 6.354h5.903L10 0z"
-                                                                clipRule="evenodd"
-                                                            />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center justify-between mt-4">
-                                                <p>In Stock: {product.stock}</p>
-                                                <button onClick={() => addToCart(product)} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600 transition duration-300">
-                                                    Add to Cart
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        product={product}
+                                        darkMode={darkMode}
+                                        addToCart={addToCart}
+                                    />
                                 ))}
                             </div>
                         </div>
                     </div>
                 </div>
             </main>
+            {modalOpen && <Modal cart={cart} removeFromCart={removeFromCart} calculateTotalPrice={calculateTotalPrice} handleModalClose={handleModalClose} />}
         </div>
     );
 }
