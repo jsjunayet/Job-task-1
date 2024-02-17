@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { RiLockPasswordLine, RiUserLine } from 'react-icons/ri';
 import { toast } from 'react-toastify';
+import { HiEye, HiEyeOff } from 'react-icons/hi'; // Import eye and eye-off icons
 import logo from '../../assets/login.png';
 
 function Login({ onLogin }) {
     const [loading, setLoading] = useState(false);
+    const [showPass, setShowPass] = useState(false); // State to toggle password visibility
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -23,9 +25,8 @@ function Login({ onLogin }) {
             if (data && data.token) {
                 localStorage.setItem('token', data.token);
                 setLoading(false);
-                toast.success("successful Login ")
+                toast.success("Successful Login ")
                 onLogin(data.token);
-
             } else {
                 setLoading(false);
                 toast.error("Wrong email & password")
@@ -55,11 +56,23 @@ function Login({ onLogin }) {
                     <div className="relative">
                         <RiLockPasswordLine className="absolute top-2 left-3 text-gray-400" />
                         <input
-                            type="password"
+                            type={showPass ? 'text' : 'password'}
                             placeholder="Password"
                             name="password"
-                            className="w-full py-1 px-2 rounded bg-gray-300 border-none focus:bg-gray-600 text-black  pl-10"
+                            className="w-full py-1 px-2 rounded bg-gray-300 border-none focus:bg-gray-600 text-black pl-10"
                         />
+                        <div className="absolute -mt-[35px] cursor-pointer right-0 flex items-center pr-3">
+                            <p
+                                onClick={() => setShowPass(!showPass)}
+                                className="p-2 focus:outline-none"
+                            >
+                                {showPass ? (
+                                    <HiEye className="h-5 w-5 text-black dark:text-white" />
+                                ) : (
+                                    <HiEyeOff className="h-5 w-5 text-black dark:text-white" />
+                                )}
+                            </p>
+                        </div>
                     </div>
                     <button disabled={loading} className="mx-auto bg-gray-300 text-xl font-semibold text-black py-1 px-3 rounded-sm hover:bg-gray-500">{loading ? <p className='flex gap-1 justify-start items-center'>Login <span className="loading loading-dots loading-sm"></span> </p> : "Login"}</button>
                 </form>
@@ -67,4 +80,5 @@ function Login({ onLogin }) {
         </div>
     );
 }
-export default Login
+
+export default Login;

@@ -173,6 +173,12 @@ function Home({ onLogout, token }) {
                                         addToCart={addToCart}
                                     />
                                 ))}
+                                {priceFilteredProducts.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center text-center">
+                                        <p className="text-xl font-semibold mb-2">No Products Found !</p>
+                                        <p className="text-gray-500">Sorry, there are no products that match the current filter criteria.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
