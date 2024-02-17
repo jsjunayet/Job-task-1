@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from "react";
-import AOS from 'aos';
-import 'aos/dist/aos.css';
 import { toast } from 'react-toastify';
 import Navbar from "./Navbar/Navbar";
 import Product from "./Product/Product";
 import Modal from "./Modal/Modal";
-
 
 function Home({ onLogout, token }) {
     const [user, setUser] = useState(null);
     const [products, setProducts] = useState([]);
     const [darkMode, setDarkMode] = useState(false);
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [priceFilteredProducts, setPriceFilteredProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
@@ -19,7 +17,7 @@ function Home({ onLogout, token }) {
     const [modalOpen, setModalOpen] = useState(false);
 
     const handleOpenModal = () => {
-        setModalOpen(true)
+        setModalOpen(true);
     };
 
     const handleModalClose = () => {
@@ -36,11 +34,13 @@ function Home({ onLogout, token }) {
         );
         if (localFiltered.length > 0) {
             setFilteredProducts(localFiltered);
+            setPriceFilteredProducts(localFiltered);
         } else {
             try {
                 const response = await fetch(`https://dummyjson.com/products/search?q=${searchTerm}`);
                 const data = await response.json();
                 setFilteredProducts(data?.products);
+                setPriceFilteredProducts(data?.products);
             } catch (error) {
                 console.error('Error fetching products:', error);
             }
@@ -48,7 +48,7 @@ function Home({ onLogout, token }) {
     };
 
     const applyPriceFilter = () => {
-        const filteredByPrice = filteredProducts.filter(product =>
+        const filteredByPrice = products.filter(product =>
             (minPrice === '' || product.price >= parseFloat(minPrice)) &&
             (maxPrice === '' || product.price <= parseFloat(maxPrice))
         );
@@ -56,19 +56,21 @@ function Home({ onLogout, token }) {
         const filteredBySearch = filteredByPrice.filter(product =>
             product.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
+
         setFilteredProducts(filteredBySearch);
+        setPriceFilteredProducts(filteredBySearch);
     };
 
     const addToCart = (product) => {
         const updatedCart = [...cart, { ...product }];
         setCart(updatedCart);
-        toast.success("successful add !")
+        toast.success("successful add !");
     };
 
     const removeFromCart = (productId) => {
         const updatedCart = cart.filter(item => item.id !== productId);
         setCart(updatedCart);
-        toast.error("Deleted")
+        toast.error("Deleted");
     };
 
     const calculateTotalPrice = () => {
@@ -104,14 +106,9 @@ function Home({ onLogout, token }) {
             .then(data => {
                 setProducts(data?.products);
                 setFilteredProducts(data?.products);
+                setPriceFilteredProducts(data?.products);
             })
             .catch(error => console.error('Error fetching products:', error));
-    }, []);
-
-    useEffect(() => {
-        AOS.init({
-            duration: 1000
-        });
     }, []);
 
     return (
@@ -168,7 +165,7 @@ function Home({ onLogout, token }) {
                     <div className=" ">
                         <div className="">
                             <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredProducts?.map((product, index) => (
+                                {priceFilteredProducts?.map((product, index) => (
                                     <Product
                                         key={product.id}
                                         product={product}

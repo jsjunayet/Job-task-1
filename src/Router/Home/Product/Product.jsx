@@ -5,7 +5,6 @@ function Product({ product, darkMode, addToCart }) {
     return (
         <div
             className={`mx-auto overflow-hidden rounded-lg shadow-lg ${darkMode ? 'bg-gray-800 text-white border-black border-2' : ''}`}
-            data-aos="fade-up"
         >
             <div className="h-64">
                 <img
